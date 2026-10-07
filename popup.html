@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Verificador de Alegações</title>
+  <link rel="stylesheet" href="theme.css" />
+  <style>
+    body { width: 400px; min-height: 260px; }
+    .wrap { padding: 14px 14px 12px; }
+
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .icon-btn { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+    .icon-btn:hover { color: var(--fg); background: var(--surface); }
+
+    .composer { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; transition: border-color .15s, box-shadow .15s; }
+    .composer:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    textarea { display: block; width: 100%; height: 76px; padding: 0; border: 0; resize: none; outline: 0; background: transparent; color: var(--fg); font: 15px/1.45 var(--serif); }
+    textarea::placeholder { color: var(--muted); font-style: italic; }
+    .composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+    .hint { color: var(--muted); font: 11px var(--mono); }
+    .hint kbd { font: inherit; padding: 0 4px; border: 1px solid var(--line); border-radius: 3px; }
+
+    #status:empty { display: none; }
+    #status { margin: 10px 2px 0; color: var(--muted); font-size: 12px; }
+    #status.erro { color: var(--false); font-weight: 600; }
+    #status.carregando::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 7px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; vertical-align: -1px; animation: giro .7s linear infinite; }
+    @keyframes giro { to { transform: rotate(360deg); } }
+
+    /* Resumo agregado */
+    .resumo { margin: 12px 0 4px; padding: 12px 12px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .resumo-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .resumo-titulo { font: 700 15px/1.25 var(--serif); }
+    .resumo-sub { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+    .barra { display: flex; gap: 3px; height: 8px; margin-top: 10px; }
+    .barra i { display: block; border-radius: 4px; min-width: 6px; }
+    .barra .true { background: var(--true); } .barra .mixed { background: var(--mixed); } .barra .false { background: var(--false); } .barra .unknown { background: var(--unknown); }
+    .legenda { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font: 11px var(--mono); color: var(--muted); }
+    .legenda span::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; background: var(--c); }
+
+    /* Cartões */
+    #resultados { display: grid; gap: 10px; margin-top: 10px; }
+    .claim { position: relative; padding: 12px 12px 4px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; animation: entra .3s ease both; animation-delay: calc(var(--i, 0) * 40ms); }
+    .claim::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--c, var(--unknown)); }
+    .claim.true { --c: var(--true); } .claim.mixed { --c: var(--mixed); } .claim.false { --c: var(--false); } .claim.unknown { --c: var(--unknown); }
+    @keyframes entra { from { opacity: 0; transform: translateY(6px); } }
+    .claim .text { font: 15px/1.4 var(--serif); }
+    .claim .text::before { content: "“"; color: var(--c); font-weight: 700; }
+    .claim .text::after { content: "”"; color: var(--c); font-weight: 700; }
+    .meta { margin-top: 5px; color: var(--muted); font: 11px/1.4 var(--mono); }
+    .reviews { margin-top: 10px; }
+    .review { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+    .review .stamp { margin-top: 1px; max-width: 150px; overflow-wrap: anywhere; }
+    .review .explica { grid-column: 1 / -1; color: var(--muted); font-size: 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .review .fonte { color: var(--muted); font: 11px/1.4 var(--mono); }
+    .review a { grid-column: 1 / -1; font-weight: 600; line-height: 1.35; text-decoration: none; overflow-wrap: anywhere; }
+    .review a:hover { text-decoration: underline; }
+    .review a::after { content: " ↗"; font-weight: 400; }
+
+    #mais { width: 100%; margin-top: 10px; }
+
+    /* Outras agências (busca de reserva) */
+    .agencias { margin-top: 14px; }
+    .agencias h2 { margin: 0 2px 2px; font: 700 14px var(--serif); }
+    .agencias > p { margin: 0 2px 10px; color: var(--muted); font-size: 11.5px; }
+    .agencias .lista { display: grid; gap: 8px; }
+    .item { padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+    .item a { display: block; margin-top: 6px; font: 600 14px/1.35 var(--serif); text-decoration: none; color: var(--fg); overflow-wrap: anywhere; }
+    .item a:hover { color: var(--accent); text-decoration: underline; }
+    .item .topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .item .fonte { color: var(--muted); font: 11px var(--mono); }
+
+    .vazio { margin-top: 14px; padding: 18px 16px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); }
+    .vazio b { display: block; margin-bottom: 4px; color: var(--fg); font: 700 14px var(--serif); }
+
+    .aviso { margin: 14px 2px 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="var(--fg)"/>
+          <path d="M9 11.5h6v6c0 2.6-1.6 4.4-4 4.8M17 11.5h6v6c0 2.6-1.6 4.4-4 4.8" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+          <path d="M10.5 16.5l3.6 3.6 7.4-8.2" fill="none" stroke="var(--true)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div><b>Verificador</b><small>Checagens de quem já analisou</small></div>
+      </div>
+      <button class="icon-btn" id="opcoes" title="Configurações" aria-label="Configurações">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </header>
+
+    <div class="composer">
+      <textarea id="query" placeholder="Cole ou selecione um trecho da notícia…" aria-label="Trecho a verificar"></textarea>
+      <div class="composer-foot">
+        <span class="hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+        <button class="btn" id="buscar">Verificar</button>
+      </div>
+    </div>
+
+    <div id="status" role="status" aria-live="polite"></div>
+    <section id="resumo" class="resumo" hidden aria-label="Resumo das checagens"></section>
+    <div id="resultados"></div>
+    <button id="mais" class="btn ghost" hidden>Carregar mais</button>
+    <section id="agencias" class="agencias" hidden aria-label="Outras agências de checagem"></section>
+
+    <p class="aviso">
+      Só aparecem alegações que algum checador já analisou. Sem resultado não significa que a notícia seja verdadeira.
+    </p>
+  </div>
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

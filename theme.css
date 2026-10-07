@@ -1,0 +1,78 @@
+/* Tokens e peças compartilhadas entre popup e configurações. */
+:root {
+  --bg: #f1f4f7;
+  --surface: #ffffff;
+  --fg: #0e1a2b;
+  --muted: #5b6878;
+  --line: #d6dde5;
+  --accent: #2447d8;
+  --accent-fg: #ffffff;
+  --accent-soft: #e4eafc;
+
+  --true: #0e7c5f;   --true-soft: #dff3ec;
+  --mixed: #b87800;  --mixed-soft: #fbefd0;
+  --false: #c5352b;  --false-soft: #fbe3e0;
+  --unknown: #6b7788; --unknown-soft: #e6eaef;
+
+  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1320;
+    --surface: #131d2e;
+    --fg: #e7edf5;
+    --muted: #93a1b4;
+    --line: #26344a;
+    --accent: #8aa4ff;
+    --accent-fg: #0b1320;
+    --accent-soft: #1c2a4d;
+
+    --true: #4fd1a5;   --true-soft: #12362c;
+    --mixed: #f2b83d;  --mixed-soft: #3a2d0c;
+    --false: #ff8a7f;  --false-soft: #3d1a17;
+    --unknown: #9aa7b8; --unknown-soft: #1f2b3d;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; font: 13px/1.45 var(--sans); color: var(--fg); background: var(--bg); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+button, input, select, textarea { font: inherit; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 16px; border: 1px solid transparent; border-radius: 8px;
+  background: var(--accent); color: var(--accent-fg); font-weight: 600; cursor: pointer;
+  transition: filter .15s, transform .1s;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.btn.ghost:hover:not(:disabled) { background: var(--surface); filter: none; }
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand svg { flex: none; }
+.brand b { display: block; font: 700 15px/1.1 var(--serif); letter-spacing: -.01em; }
+.brand small { color: var(--muted); font-size: 11px; }
+
+/* Carimbo de veredito */
+.stamp {
+  display: inline-block; padding: 2px 9px 3px; border: 2px solid currentColor; border-radius: 4px;
+  font: 700 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  transform: rotate(-2deg); box-shadow: inset 0 0 0 1px var(--surface), inset 0 0 0 2px currentColor;
+}
+.stamp.true { color: var(--true); background: var(--true-soft); }
+.stamp.mixed { color: var(--mixed); background: var(--mixed-soft); }
+.stamp.false { color: var(--false); background: var(--false-soft); }
+.stamp.unknown { color: var(--unknown); background: var(--unknown-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

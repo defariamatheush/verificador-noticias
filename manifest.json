@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Verificador de Alegações",
+  "version": "1.4.2",
+  "description": "Seleciona um trecho de texto e consulta checagens existentes na Google Fact Check Tools API. Marca resultados do Google com selos verde, amarelo e vermelho.",
+  "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://factchecktools.googleapis.com/*",
+    "https://www.boatos.org/*",
+    "https://www.agencialupa.org/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.google.com/search*",
+        "https://*.google.com.br/search*",
+        "https://google.com/search*",
+        "https://google.com.br/search*",
+        "https://*.google.pt/search*"
+      ],
+      "js": ["shared.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Verificar alegação"
+  },
+  "options_page": "options.html"
+}
